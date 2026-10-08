@@ -1,163 +1,636 @@
-// ===============================
-// JARVIS SYSTEM
-// ===============================
+```javascript
+// ========================================
+// JARVIS AI VOICE SYSTEM
+// ========================================
 
 const jarvisBtn = document.getElementById("jarvisBtn");
 const commandBtn = document.getElementById("commandBtn");
 const status = document.getElementById("jarvisStatus");
 
-let systemActive = false;
+let jarvisOnline = false;
+let isListening = false;
 
 
-// ===============================
-// ACTIVATE JARVIS
-// ===============================
+// ========================================
+// SPEECH RECOGNITION
+// ========================================
 
-function activateJarvis() {
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
 
-    if (!systemActive) {
+let recognition = null;
 
-        systemActive = true;
+if (SpeechRecognition) {
 
-        status.textContent = "JARVIS ONLINE // SYSTEM READY";
-        status.style.color = "#ff0000";
+    recognition = new SpeechRecognition();
 
-        commandBtn.textContent = "SYSTEM ONLINE";
+    // زبان فارسی
+    recognition.lang = "fa-IR";
 
-        document.body.style.boxShadow =
-            "inset 0 0 100px rgba(255, 0, 0, 0.08)";
+    // فقط یک جمله را دریافت کن
+    recognition.continuous = false;
 
-        speak(
-            "Welcome back, sir. All systems are operational."
-        );
+    // نتیجه نهایی
+    recognition.interimResults = false;
 
-    } else {
+} else {
 
-        systemActive = false;
-
-        status.textContent = "SYSTEM STANDBY";
-        status.style.color = "#555";
-
-        commandBtn.textContent = "START SYSTEM";
-
-        document.body.style.boxShadow = "none";
-
-        speak(
-            "System going into standby mode."
-        );
-    }
-}
-
-
-// ===============================
-// MAIN JARVIS BUTTON
-// ===============================
-
-if (jarvisBtn) {
-
-    jarvisBtn.addEventListener("click", function () {
-
-        const jarvisSection =
-            document.getElementById("jarvis");
-
-        if (jarvisSection) {
-
-            jarvisSection.scrollIntoView({
-                behavior: "smooth"
-            });
-
-        }
-
-        setTimeout(function () {
-            activateJarvis();
-        }, 700);
-
-    });
-
-}
-
-
-// ===============================
-// START SYSTEM BUTTON
-// ===============================
-
-if (commandBtn) {
-
-    commandBtn.addEventListener(
-        "click",
-        activateJarvis
+    console.log(
+        "Speech Recognition is not supported."
     );
 
 }
 
 
-// ===============================
-// JARVIS VOICE
-// ===============================
+// ========================================
+// JARVIS SPEAK
+// ========================================
 
-function speak(text) {
+function jarvisSpeak(text) {
 
-    if (!("speechSynthesis" in window)) {
+    if (!window.speechSynthesis) {
+
+        console.log(
+            "Speech Synthesis is not supported."
+        );
+
         return;
     }
 
-    const speech =
+    // توقف صدای قبلی
+    speechSynthesis.cancel();
+
+    const voice =
         new SpeechSynthesisUtterance(text);
 
-    speech.lang = "en-US";
+    // زبان فارسی
+    voice.lang = "fa-IR";
 
-    speech.rate = 0.9;
+    // سرعت صحبت
+    voice.rate = 0.9;
 
-    speech.pitch = 0.8;
+    // زیر و بمی صدا
+    voice.pitch = 0.8;
 
-    window.speechSynthesis.cancel();
+    // حجم صدا
+    voice.volume = 1;
 
-    window.speechSynthesis.speak(speech);
+    speechSynthesis.speak(voice);
 }
 
 
-// ===============================
-// ARMOR SELECTION
-// ===============================
+// ========================================
+// JARVIS RESPONSES
+// ========================================
+
+function getJarvisResponse(message) {
+
+    const text =
+        message.toLowerCase().trim();
+
+
+    // --------------------
+    // سلام
+    // --------------------
+
+    if (
+        text.includes("سلام") ||
+        text.includes("درود")
+    ) {
+
+        return "سلام قربان. جارویس در خدمت شماست.";
+
+    }
+
+
+    // --------------------
+    // اسم
+    // --------------------
+
+    if (
+        text.includes("اسمت چیه") ||
+        text.includes("اسمت") ||
+        text.includes("کی هستی")
+    ) {
+
+        return "من جارویس هستم، دستیار هوشمند سیستم استارک.";
+
+    }
+
+
+    // --------------------
+    // حالت چطوره
+    // --------------------
+
+    if (
+        text.includes("خوبی") ||
+        text.includes("چطوری")
+    ) {
+
+        return "تمام سیستم‌ها در وضعیت پایدار هستند قربان.";
+
+    }
+
+
+    // --------------------
+    // ساعت
+    // --------------------
+
+    if (
+        text.includes("ساعت") ||
+        text.includes("زمان")
+    ) {
+
+        const now = new Date();
+
+        const time =
+            now.toLocaleTimeString(
+                "fa-IR",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+
+        return "قربان، ساعت اکنون " +
+            time +
+            " است.";
+
+    }
+
+
+    // --------------------
+    // تاریخ
+    // --------------------
+
+    if (
+        text.includes("تاریخ") ||
+        text.includes("امروز")
+    ) {
+
+        const now = new Date();
+
+        const date =
+            now.toLocaleDateString(
+                "fa-IR"
+            );
+
+        return "امروز " +
+            date +
+            " است قربان.";
+
+    }
+
+
+    // --------------------
+    // آیرون من
+    // --------------------
+
+    if (
+        text.includes("آیرون من") ||
+        text.includes("آیرونمن") ||
+        text.includes("زره")
+    ) {
+
+        return "سیستم زره آیرون من آماده است قربان.";
+
+    }
+
+
+    // --------------------
+    // فعال کردن سیستم
+    // --------------------
+
+    if (
+        text.includes("فعال کن") ||
+        text.includes("روشن کن") ||
+        text.includes("سیستم رو روشن")
+    ) {
+
+        return "تمام سیستم‌ها فعال شدند قربان.";
+
+    }
+
+
+    // --------------------
+    // خاموش کردن
+    // --------------------
+
+    if (
+        text.includes("خاموش شو") ||
+        text.includes("خاموش کن") ||
+        text.includes("خواب")
+    ) {
+
+        return "سیستم وارد حالت آماده‌باش می‌شود قربان.";
+
+    }
+
+
+    // --------------------
+    // تشکر
+    // --------------------
+
+    if (
+        text.includes("ممنون") ||
+        text.includes("مرسی") ||
+        text.includes("تشکر")
+    ) {
+
+        return "خواهش می‌کنم قربان.";
+
+    }
+
+
+    // --------------------
+    // خداحافظی
+    // --------------------
+
+    if (
+        text.includes("خداحافظ") ||
+        text.includes("فعلا")
+    ) {
+
+        return "خدانگهدار قربان.";
+
+    }
+
+
+    // --------------------
+    // جواب پیش‌فرض
+    // --------------------
+
+    return "متوجه نشدم قربان. لطفاً دوباره تکرار کنید.";
+
+}
+
+
+// ========================================
+// START JARVIS
+// ========================================
+
+function startJarvis() {
+
+    jarvisOnline = true;
+
+    if (status) {
+
+        status.textContent =
+            "JARVIS ONLINE // SYSTEM READY";
+
+        status.style.color =
+            "#ff0000";
+    }
+
+    if (commandBtn) {
+
+        commandBtn.textContent =
+            "🎙️ TALK TO JARVIS";
+
+    }
+
+    jarvisSpeak(
+        "سلام قربان. جارویس آنلاین است. آماده دریافت فرمان هستم."
+    );
+}
+
+
+// ========================================
+// LISTEN TO USER
+// ========================================
+
+function listenToUser() {
+
+    if (!recognition) {
+
+        jarvisSpeak(
+            "قربان، مرورگر شما از تشخیص صدا پشتیبانی نمی‌کند."
+        );
+
+        return;
+    }
+
+
+    if (isListening) {
+
+        return;
+
+    }
+
+
+    isListening = true;
+
+
+    if (status) {
+
+        status.textContent =
+            "🎙️ JARVIS IS LISTENING...";
+
+        status.style.color =
+            "#ff0000";
+
+    }
+
+
+    try {
+
+        recognition.start();
+
+    } catch (error) {
+
+        console.log(error);
+
+        isListening = false;
+
+    }
+
+}
+
+
+// ========================================
+// USER SPEAKS
+// ========================================
+
+if (recognition) {
+
+    recognition.onstart =
+        function () {
+
+            isListening = true;
+
+            if (status) {
+
+                status.textContent =
+                    "🎙️ LISTENING...";
+
+            }
+
+        };
+
+
+    recognition.onresult =
+        function (event) {
+
+            const userText =
+                event.results[0][0].transcript;
+
+
+            console.log(
+                "USER:",
+                userText
+            );
+
+
+            if (status) {
+
+                status.textContent =
+                    "YOU: " + userText;
+
+            }
+
+
+            // دریافت پاسخ
+            const response =
+                getJarvisResponse(userText);
+
+
+            console.log(
+                "JARVIS:",
+                response
+            );
+
+
+            // کمی تأخیر برای طبیعی‌تر شدن
+            setTimeout(
+                function () {
+
+                    if (status) {
+
+                        status.textContent =
+                            "JARVIS: " + response;
+
+                    }
+
+                    jarvisSpeak(
+                        response
+                    );
+
+                },
+                400
+            );
+
+        };
+
+
+    recognition.onerror =
+        function (event) {
+
+            console.log(
+                "Voice Error:",
+                event.error
+            );
+
+
+            isListening = false;
+
+
+            if (
+                event.error ===
+                "not-allowed"
+            ) {
+
+                if (status) {
+
+                    status.textContent =
+                        "❌ MICROPHONE ACCESS DENIED";
+
+                }
+
+                jarvisSpeak(
+                    "قربان، اجازه استفاده از میکروفون داده نشده است."
+                );
+
+            } else {
+
+                if (status) {
+
+                    status.textContent =
+                        "VOICE SYSTEM ERROR";
+
+                }
+
+            }
+
+        };
+
+
+    recognition.onend =
+        function () {
+
+            isListening = false;
+
+
+            setTimeout(
+                function () {
+
+                    if (jarvisOnline &&
+                        status) {
+
+                        status.textContent =
+                            "JARVIS READY";
+
+                    }
+
+                },
+                2500
+            );
+
+        };
+
+}
+
+
+// ========================================
+// MAIN JARVIS BUTTON
+// ========================================
+
+if (jarvisBtn) {
+
+    jarvisBtn.addEventListener(
+        "click",
+        function () {
+
+            const jarvisSection =
+                document.getElementById("jarvis");
+
+
+            if (jarvisSection) {
+
+                jarvisSection.scrollIntoView({
+                    behavior: "smooth"
+                });
+
+            }
+
+
+            setTimeout(
+                function () {
+
+                    startJarvis();
+
+                },
+                700
+            );
+
+        }
+    );
+
+}
+
+
+// ========================================
+// TALK BUTTON
+// ========================================
+
+if (commandBtn) {
+
+    commandBtn.addEventListener(
+        "click",
+        function () {
+
+            if (!jarvisOnline) {
+
+                startJarvis();
+
+                return;
+
+            }
+
+
+            listenToUser();
+
+        }
+    );
+
+}
+
+
+// ========================================
+// ARMOR SYSTEM
+// ========================================
 
 const suits =
     document.querySelectorAll(".suit-card");
 
-suits.forEach(function (suit) {
 
-    suit.addEventListener("click", function () {
+suits.forEach(
+    function (suit) {
 
-        suits.forEach(function (item) {
+        suit.addEventListener(
+            "click",
+            function () {
 
-            item.classList.remove("active");
+                // حذف انتخاب قبلی
+                suits.forEach(
+                    function (item) {
 
-        });
+                        item.classList.remove(
+                            "active"
+                        );
 
-        suit.classList.add("active");
-
-        const title =
-            suit.querySelector("h3");
-
-        if (title) {
-
-            speak(
-                title.textContent +
-                " selected"
-            );
-
-        }
-
-    });
-
-});
+                    }
+                );
 
 
-// ===============================
+                // انتخاب زره
+                suit.classList.add(
+                    "active"
+                );
+
+
+                const title =
+                    suit.querySelector("h3");
+
+
+                if (title) {
+
+                    const armorName =
+                        title.textContent;
+
+
+                    if (status) {
+
+                        status.textContent =
+                            armorName +
+                            " SELECTED";
+
+                    }
+
+
+                    jarvisSpeak(
+                        armorName +
+                        " انتخاب شد قربان."
+                    );
+
+                }
+
+            }
+        );
+
+    }
+);
+
+
+// ========================================
 // ARC REACTOR MOUSE EFFECT
-// ===============================
+// ========================================
 
 const reactor =
-    document.querySelector(".arc-reactor");
+    document.querySelector(
+        ".arc-reactor"
+    );
+
 
 if (reactor) {
 
@@ -167,11 +640,13 @@ if (reactor) {
 
             const x =
                 (window.innerWidth / 2 -
-                event.clientX) / 40;
+                    event.clientX) / 50;
+
 
             const y =
                 (window.innerHeight / 2 -
-                event.clientY) / 40;
+                    event.clientY) / 50;
+
 
             reactor.style.transform =
                 `translate(
@@ -185,62 +660,34 @@ if (reactor) {
 }
 
 
-// ===============================
-// SCROLL EFFECT
-// ===============================
-
-const sections =
-    document.querySelectorAll("section");
-
-function checkScroll() {
-
-    const scrollPosition =
-        window.scrollY;
-
-    sections.forEach(function (section) {
-
-        const sectionTop =
-            section.offsetTop;
-
-        const sectionHeight =
-            section.offsetHeight;
-
-        if (
-            scrollPosition >
-                sectionTop - 500 &&
-            scrollPosition <
-                sectionTop + sectionHeight
-        ) {
-
-            section.style.opacity = "1";
-
-        }
-
-    });
-
-}
-
-window.addEventListener(
-    "scroll",
-    checkScroll
-);
-
-
-// ===============================
-// PAGE LOAD
-// ===============================
+// ========================================
+// STARTUP
+// ========================================
 
 window.addEventListener(
     "load",
     function () {
 
         console.log(
+            "================================"
+        );
+
+        console.log(
             "JARVIS SYSTEM INITIALIZED"
         );
 
         console.log(
-            "All systems operational."
+            "STARK INDUSTRIES"
+        );
+
+        console.log(
+            "ALL SYSTEMS READY"
+        );
+
+        console.log(
+            "================================"
         );
 
     }
 );
+```
